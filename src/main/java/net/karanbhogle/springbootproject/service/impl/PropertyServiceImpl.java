@@ -5,41 +5,54 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import net.karanbhogle.springbootproject.converter.PropertyConverter;
 import net.karanbhogle.springbootproject.dto.PropertyDTO;
 import net.karanbhogle.springbootproject.entity.PropertyEntity;
+import net.karanbhogle.springbootproject.entity.UserEntity;
 import net.karanbhogle.springbootproject.repository.PropertyRepository;
+import net.karanbhogle.springbootproject.repository.UserRepository;
 import net.karanbhogle.springbootproject.service.PropertyService;
+import net.karanbhogle.springbootproject.utils.MessageHelper;
 
 @Service
 public class PropertyServiceImpl implements PropertyService{
 
 	@Autowired
-	PropertyConverter converter;
+	private PropertyConverter converter;
 	
 	@Autowired
-	PropertyRepository repository;
+	private PropertyRepository repository;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	public PropertyDTO saveProperty(PropertyDTO propertyDTO) {
-		//convert DTO to Entity
-		PropertyEntity pe = converter.convertDTOToEntity(propertyDTO);
+		PropertyEntity savedPE = null;
+		//before anything, we will get the userId from PropertyDTO
+		Optional<UserEntity> optUE = userRepository.findById(propertyDTO.getUserId());
 		
-		//save that entity object to DB
-		//db will return saved entity
-		PropertyEntity savedPE = repository.save(pe);
+		if(optUE.isPresent()) {
+			//convert DTO to Entity
+			PropertyEntity pe = converter.convertDTOToEntity(propertyDTO);
+			pe.setUserEntity(optUE.get());
+			
+			//save that entity object to DB
+			//db will return saved entity
+			savedPE = repository.save(pe);
+		} else {
+			MessageHelper.getErrorMessageList("USER_ID_DOESNT_EXIST", "User doesn't exists");
+		}
 		
 		//savedenttiy to be converted to DTO and return it
-		PropertyDTO responseDTO = converter.convertEntityToDTO(savedPE);
-		return responseDTO;
+		return converter.convertEntityToDTO(savedPE);
 	}
 
 	@Override
 	public List<PropertyDTO> getAllProperties() {
-		List<PropertyEntity> foundPEList = repository.findAll();
+		Iterable<PropertyEntity> foundPEList = repository.findAll();
 		List<PropertyDTO> responseList = new ArrayList<>();
 		for(PropertyEntity pe: foundPEList) {
 			PropertyDTO pd = converter.convertEntityToDTO(pe);
@@ -128,6 +141,17 @@ public class PropertyServiceImpl implements PropertyService{
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public List<PropertyDTO> getAllPropertiesByUserId(Long id) {
+		List<PropertyEntity> optPE = repository.findAllByUserEntityId(id);
+		List<PropertyDTO> responseList = new ArrayList<>();
+		
+		for(PropertyEntity pe: optPE) {
+			responseList.add(converter.convertEntityToDTO(pe));
+		}
+		return responseList;
 	}
 
 }

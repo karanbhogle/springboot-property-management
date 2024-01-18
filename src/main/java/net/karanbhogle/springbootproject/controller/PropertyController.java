@@ -1,5 +1,7 @@
 package net.karanbhogle.springbootproject.controller;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,50 +28,57 @@ public class PropertyController {
 	@Autowired
 	PropertyService propertyService;
 	
+	Logger logger = Logger.getLogger(getClass().getName());
 
 	@Value("${spring.profiles.active}")
 	String currentActiveProfile;
 	
 	@GetMapping("/hello")
 	public String hello() {
-		System.out.println("Current Active Profile: " + currentActiveProfile);
+		logger.log(Level.ALL, "Current Active Profile: {0}", currentActiveProfile);
 		return "Hello World";
 	}
 	
 	@PostMapping("/properties")
 	public ResponseEntity<PropertyDTO> saveProperty(@RequestBody PropertyDTO propertyDTO) {
 		PropertyDTO responseDTO = propertyService.saveProperty(propertyDTO);
-		return new ResponseEntity<PropertyDTO>(responseDTO, HttpStatus.CREATED);
+		return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 	}
 	
 	@GetMapping("/properties")
 	public ResponseEntity<List<PropertyDTO>> getAllProperties() {
 		List<PropertyDTO> responseDTOs = propertyService.getAllProperties();
-		return new ResponseEntity<List<PropertyDTO>>(responseDTOs, HttpStatus.OK);
+		return new ResponseEntity<>(responseDTOs, HttpStatus.OK);
+	}
+	
+	@GetMapping("/properties/user/{userId}")
+	public ResponseEntity<List<PropertyDTO>> getAllPropertiesByUserId(@PathVariable("userId") Long id) {
+		List<PropertyDTO> responseDTOs = propertyService.getAllPropertiesByUserId(id);
+		return new ResponseEntity<>(responseDTOs, HttpStatus.OK);
 	}
 	
 	@PutMapping("/properties/{id}")
 	public ResponseEntity<PropertyDTO> updateProperty(@RequestBody PropertyDTO propertyDTO, @PathVariable Long id) {
 		PropertyDTO responseDTO = propertyService.updateProperty(propertyDTO, id);
-		return new ResponseEntity<PropertyDTO>(responseDTO, HttpStatus.OK);
+		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/properties/updateTitle/{id}")
 	public ResponseEntity<PropertyDTO> updatePropertyTitle(@RequestBody PropertyDTO propertyDTO, @PathVariable Long id) {
 		PropertyDTO responseDTO = propertyService.updatePropertyTitle(propertyDTO, id);
-		return new ResponseEntity<PropertyDTO>(responseDTO, HttpStatus.OK);
+		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/properties/updateDescription/{id}")
 	public ResponseEntity<PropertyDTO> updatePropertyDescription(@RequestBody PropertyDTO propertyDTO, @PathVariable Long id) {
 		PropertyDTO responseDTO = propertyService.updatePropertyDescription(propertyDTO, id);
-		return new ResponseEntity<PropertyDTO>(responseDTO, HttpStatus.OK);
+		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 	
 	@PatchMapping("/properties/updatePrice/{id}")
 	public ResponseEntity<PropertyDTO> updatePropertyPrice(@RequestBody PropertyDTO propertyDTO, @PathVariable Long id) {
 		PropertyDTO responseDTO = propertyService.updatePropertyPrice(propertyDTO, id);
-		return new ResponseEntity<PropertyDTO>(responseDTO, HttpStatus.OK);
+		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/properties/deleteProperty/{id}")
@@ -81,6 +90,6 @@ public class PropertyController {
 		} else {
 			message = "No such property";
 		}
-		return new ResponseEntity<String>(message, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(message, HttpStatus.NO_CONTENT);
 	}
 }

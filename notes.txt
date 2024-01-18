@@ -1,0 +1,7 @@
+http://localhost:8080/v2/api-docs
+http://localhost:8080/swagger-ui/index.html
+https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
+http://localhost:8080/actuator
+
+For *-> One relationship, default is FetchType.Eager -> While getting parent data also get child entity
+For *-> Many relationship, default is FetchType.Lazy -> While getting parent data, do not get child entity
